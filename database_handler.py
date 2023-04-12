@@ -46,3 +46,16 @@ def get_user_money(username):
         cursor.execute(f"""SELECT money FROM users WHERE username='{username}'""")
         return cursor.fetchone()[0]  # fetchone() returns an one-element-long tuple, which I have no need in, so I just select that element
 
+
+def get_leaderboard():
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT * FROM users ORDER BY money DESC LIMIT 10""")
+        return cursor.fetchall()

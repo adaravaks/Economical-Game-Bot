@@ -39,5 +39,17 @@ async def back_to_menu(message: types.Message):
     await bot.send_message(message.from_user.id, f'Welcome to the game, {username}', reply_markup=markups.main_menu)
 
 
+@dp.callback_query_handler(text='show_leaderboard')
+async def show_leaderboard(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+
+    leaderboard = get_leaderboard()
+    str_leaderboard = ''
+    for player_index in range(len(leaderboard[:10])):
+        str_leaderboard += f'{player_index+1}. {leaderboard[player_index][1]}: {leaderboard[player_index][2]} 💵\n'  # Leaderboard position, then username, then user's money
+
+    await bot.send_message(message.from_user.id, str_leaderboard, reply_markup=markups.back_to_menu)
+
+
 if __name__ == '__main__':
     executor.start_polling(dp)
