@@ -33,7 +33,7 @@ def user_exists(username):
         return False
 
 
-def user_money(username):
+def get_user_money(username):
     connection = psycopg2.connect(
         host=config('HOST'),
         user=config('USER'),
@@ -44,4 +44,5 @@ def user_money(username):
 
     with connection.cursor() as cursor:
         cursor.execute(f"""SELECT money FROM users WHERE username='{username}'""")
-        return cursor.fetchone()[0]  # fetchone() returns an one-element-long tuple, which is unnecessary for me, so I just select the element
+        return cursor.fetchone()[0]  # fetchone() returns an one-element-long tuple, which I have no need in, so I just select that element
+
