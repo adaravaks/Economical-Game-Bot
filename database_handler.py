@@ -1,5 +1,6 @@
 import psycopg2
 from decouple import config
+from datetime import datetime
 
 
 def add_user(username, money):
@@ -76,9 +77,36 @@ def user_in_leaderboard(username):
 
     leaderboard_dict = {}
     for index in range(len(leaderboard)):
-        leaderboard_dict[leaderboard[index][1]] = index + 1
+        leaderboard_dict[leaderboard[index][1]] = index + 1  # Key is username, value is current leaderboard position
 
     try:
         return leaderboard_dict[username]
     except KeyError:
         return None
+
+
+def bonus_available(username):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT bonus_claim_time FROM users WHERE username='{username}'""")
+        last_claim_datetime = cursor.fetchone()  # Same as line 48
+        if not last_claim_datetime:
+            return False  # cursor.fetchone() returns empty tuple in case if there is nobody found in database with certain username, so no bonus should be given for that nobody
+
+    try:
+        timestamp_claim = datetime.strptime(str(last_claim_datetime[0]), '%Y-%m-%d %H:%M:%S.%f')
+        timestamp_now = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
+        delta = timestamp_now - timestamp_claim
+    except ValueError:
+        return True  # ValueError here raises only if user's "bonus_claim_time" in database is NULL, which means this is their first time collecting the bonus, thus they are allowed to get it
+
+    if delta.total_seconds() >= 7200:
+        return True
+    return False

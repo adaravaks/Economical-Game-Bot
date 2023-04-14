@@ -29,7 +29,7 @@ async def other(message: types.Message):
 async def user_checkout(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
     username = message.from_user.username
-    await bot.send_message(message.from_user.id, f'Username: {username}\nMoney: {get_user_money(username)} 💵\nCurrent leaderboard position: {user_in_leaderboard(username)}\nGet better.', reply_markup=markups.back_to_menu)
+    await bot.send_message(message.from_user.id, f'Username: {username}\nMoney: {get_user_money(username)} 💵\nLeaderboard position: {user_in_leaderboard(username)}\nGet better.', reply_markup=markups.back_to_menu)
 
 
 @dp.callback_query_handler(text='back_to_menu')
