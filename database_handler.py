@@ -96,7 +96,7 @@ def bonus_available(username):
 
     with connection.cursor() as cursor:
         cursor.execute(f"""SELECT bonus_claim_time FROM users WHERE username='{username}'""")
-        last_claim_datetime = cursor.fetchone()  # Same as line 48
+        last_claim_datetime = cursor.fetchone()
         if not last_claim_datetime:
             return False  # cursor.fetchone() returns empty tuple in case if there is nobody found in database with certain username, so no bonus should be given for that nobody
 
@@ -110,3 +110,22 @@ def bonus_available(username):
     if delta.total_seconds() >= 7200:
         return True
     return False
+
+
+def add_bonus(username):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT money FROM users WHERE username='{username}'""")
+        curr_money = cursor.fetchone()[0]  # Same as line 48
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""UPDATE users SET money={curr_money + 2000} WHERE username='{username}'""")
+        cursor.execute(f"""UPDATE users SET bonus_claim_time='{datetime.now()}' WHERE username='{username}'""")
+    return 'Bonus added successfully'
