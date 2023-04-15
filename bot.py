@@ -1,6 +1,7 @@
 from decouple import config
+from random import randint
 from aiogram import Bot, Dispatcher, executor, types
-from database_handler import add_user, user_exists, get_user_money, get_leaderboard, user_in_leaderboard, bonus_available, add_bonus
+from database_handler import add_user, user_exists, get_user_money, get_leaderboard, user_in_leaderboard, bonus_available, change_money
 import markups
 
 
@@ -20,9 +21,30 @@ async def start(message: types.Message):
     await message.answer(f'Welcome to the game, {username}', reply_markup=markups.main_menu)
 
 
+@dp.message_handler(commands='coin_toss')
+async def coin_toss(message: types.Message):
+    username = message.from_user.username
+    msg_words = message.text.split()
+    try:
+        stake_money = int(msg_words[-1])
+    except:
+        stake_money = None
+    if len(msg_words) == 3 and (msg_words[1] == 'heads' or msg_words[1] == 'tails'):
+        stake_outcome = msg_words[1]
+        outcome = "heads" if randint(0, 1) == 0 else "tails"
+        if stake_outcome == outcome:
+            change_money(username, stake_money)
+            await message.reply(f"🥳 Congrats, you won! The coin landed on it's {outcome} and your wallet has been expended by additional {stake_money}💵.\nYou can play coin toss one more time if you're sure your luck won't fail you.", reply_markup=markups.to_menus)
+        else:
+            change_money(username, -stake_money)
+            await message.reply(f"😰 Oh no, you lost! The coin landed on it's {outcome} and your {stake_money}💵 have suddenly disappeared from your wallet.\nPerhaps, you can get your money back if you play coin toss one more time, though you can lose even more as well. The decision is up to you.", reply_markup=markups.to_menus)
+    else:
+        await message.reply(f'There is something wrong with your command. This is how it should be entered:\n/coin_toss <heads/tails> <your stake>\nFor example:\n/coin_toss {"heads" if randint(0, 1) == 0 else "tails"} {randint(100, 10000)}', reply_markup=markups.to_menus)
+
+
 @dp.message_handler()
 async def other(message: types.Message):
-    await message.reply('explain yourself')
+    await message.reply('I am trying my best to understand you, but I still can not, which makes  me feel dumb.\n😓 Please, stop embarrassing me. Just use "/menu" and play the game')
 
 
 @dp.callback_query_handler(text='user_checkout')
@@ -61,10 +83,15 @@ async def to_money_menu(message: types.Message):
 async def free_bonus(message: types.Message):
     username = message.from_user.username
     if bonus_available(username):
-        add_bonus(username)
+        change_money(username, 2000)
         await bot.send_message(message.from_user.id, '✅ You received a bonus of 2000 money units, congrats! Come back for the new one in two hours😉')
     else:
         await bot.send_message(message.from_user.id, "❌ You have already received a bonus recently, don't be so greedy! You will be able to receive a new bonus after two hours since the moment you received the previous one.")
+
+
+@dp.callback_query_handler(text='coin_toss_rules')
+async def coin_toss_rules(message: types.Message):
+    await bot.send_message(message.from_user.id, 'Coin toss, huh? Very well then! Here are the rules:\n')
 
 
 if __name__ == '__main__':

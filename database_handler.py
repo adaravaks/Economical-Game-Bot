@@ -112,7 +112,7 @@ def bonus_available(username):
     return False
 
 
-def add_bonus(username):
+def change_money(username, money):
     connection = psycopg2.connect(
         host=config('HOST'),
         user=config('USER'),
@@ -126,6 +126,6 @@ def add_bonus(username):
         curr_money = cursor.fetchone()[0]  # Same as line 48
 
     with connection.cursor() as cursor:
-        cursor.execute(f"""UPDATE users SET money={curr_money + 2000} WHERE username='{username}'""")
+        cursor.execute(f"""UPDATE users SET money={curr_money + money} WHERE username='{username}'""")
         cursor.execute(f"""UPDATE users SET bonus_claim_time='{datetime.now()}' WHERE username='{username}'""")
-    return 'Bonus added successfully'
+    return 'Money changed successfully'
