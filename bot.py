@@ -63,7 +63,6 @@ async def other(message: types.Message):
 
 @dp.callback_query_handler(text='user_checkout')
 async def user_checkout(message: types.Message):
-    await bot.delete_message(message.from_user.id, message.message.message_id)
     username = message.from_user.username
     await bot.send_message(message.from_user.id, f'Username: {username}\nMoney: {get_user_money(username)} 💵\nLeaderboard position: {user_in_leaderboard(username)}\nGet better.', reply_markup=markups.to_main_menu)
 
@@ -77,8 +76,6 @@ async def back_to_menu(message: types.Message):
 
 @dp.callback_query_handler(text='show_leaderboard')
 async def show_leaderboard(message: types.Message):
-    await bot.delete_message(message.from_user.id, message.message.message_id)
-
     leaderboard = get_leaderboard()
     str_leaderboard = ''
     for player_index in range(len(leaderboard[:10])):
@@ -89,8 +86,7 @@ async def show_leaderboard(message: types.Message):
 
 @dp.callback_query_handler(text='to_money_menu')
 async def to_money_menu(message: types.Message):
-    await bot.delete_message(message.from_user.id, message.message.message_id)
-    await bot.send_message(message.from_user.id, 'Alright, here goes business!🤩💰', reply_markup=markups.money_menu)
+    await bot.send_message(message.from_user.id, 'Alright, here goes gambling!🤩💰', reply_markup=markups.money_menu)
 
 
 @dp.callback_query_handler(text='free_bonus')
@@ -98,7 +94,7 @@ async def free_bonus(message: types.Message):
     username = message.from_user.username
     if bonus_available(username):
         change_money(username, 2000)
-        await bot.send_message(message.from_user.id, '✅ You received a bonus of 2000 money units, congrats! Come back for the new one in two hours😉')
+        await bot.send_message(message.from_user.id, '✅ You received a bonus of 2000 💵, congrats! Come back for the new one in two hours😉')
     else:
         await bot.send_message(message.from_user.id, "❌ You have already received a bonus recently, don't be so greedy! You will be able to receive a new bonus after two hours since the moment you received the previous one.")
 
@@ -107,6 +103,10 @@ async def free_bonus(message: types.Message):
 async def coin_toss_rules(message: types.Message):
     await bot.send_message(message.from_user.id, f'Coin toss, huh? Very well then! Here are the rules:\nTo play coin toss, you must enter "/coin_toss" command and send it followed by the outcome you expect and size of your stake. This is the example of how it should look:\n\n/coin_toss {"heads" if randint(0, 1) == 0 else "tails"} {randint(100, 10000)}\n\nRemember, that you can not bet more money than you have in your wallet 😉')
 
+
+@dp.callback_query_handler(text='to_shop_menu')
+async def shop_menu(message: types.Message):
+    await bot.send_message(message.from_user.id, 'Wanna invest your money in something? Sure! Here go businesses! 📈', reply_markup=markups.shop_menu)
 
 if __name__ == '__main__':
     executor.start_polling(dp)
