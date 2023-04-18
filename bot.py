@@ -108,5 +108,11 @@ async def coin_toss_rules(message: types.Message):
 async def shop_menu(message: types.Message):
     await bot.send_message(message.from_user.id, 'Wanna invest your money in something? Sure! Here go businesses! 📈', reply_markup=markups.shop_menu)
 
+
+@dp.callback_query_handler(text='buy_kiosk')
+async def buy_kiosk(message: types.Message):
+    pass
+
+
 if __name__ == '__main__':
     executor.start_polling(dp)
