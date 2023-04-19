@@ -13,8 +13,7 @@ def add_user(username, money):
     connection.autocommit = True
 
     with connection.cursor() as cursor:
-        cursor.execute(
-            f"""INSERT INTO users (username, money) VALUES ('{username}', {money});""")
+        cursor.execute(f"""INSERT INTO users (username, money) VALUES ('{username}', {money});""")
         return f'User {username} was successfully added'
 
 
@@ -123,9 +122,27 @@ def change_money(username, money):
 
     with connection.cursor() as cursor:
         cursor.execute(f"""SELECT money FROM users WHERE username='{username}'""")
-        curr_money = cursor.fetchone()[0]  # Same as line 48
+        curr_money = cursor.fetchone()[0]
 
     with connection.cursor() as cursor:
         cursor.execute(f"""UPDATE users SET money={curr_money + money} WHERE username='{username}'""")
         cursor.execute(f"""UPDATE users SET bonus_claim_time='{datetime.now()}' WHERE username='{username}'""")
     return 'Money changed successfully'
+
+
+def add_business(username, business_func_name):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT id FROM users WHERE username='{username}'""")
+        user_id = cursor.fetchone()[0]
+        cursor.execute(f"""SELECT id FROM businesses WHERE func_name='{business_func_name}'""")
+        business_id = cursor.fetchone()[0]
+        cursor.execute(f"""INSERT INTO users_to_businesses (user_id, business_id) VALUES ({user_id}, {business_id});""")
+        return 'Business added successfully'
