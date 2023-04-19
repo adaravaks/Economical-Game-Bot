@@ -130,7 +130,7 @@ def change_money(username, money):
     return 'Money changed successfully'
 
 
-def add_business(username, business_func_name):
+def buy_business(username, business_func_name):  # TODO: It has to be made sure that user has enough money for a purchase BEFORE calling this function
     connection = psycopg2.connect(
         host=config('HOST'),
         user=config('USER'),
@@ -140,9 +140,17 @@ def add_business(username, business_func_name):
     connection.autocommit = True
 
     with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT price FROM businesses WHERE func_name='{business_func_name}'""")
+        business_price = cursor.fetchone()[0]
+        cursor.execute(f"""SELECT money FROM users WHERE username='{username}'""")
+        user_money = cursor.fetchone()[0]
+        new_user_money = user_money - business_price
+        cursor.execute(f"""UPDATE users SET money={new_user_money} WHERE username='{username}'""")
+
+    with connection.cursor() as cursor:
         cursor.execute(f"""SELECT id FROM users WHERE username='{username}'""")
         user_id = cursor.fetchone()[0]
         cursor.execute(f"""SELECT id FROM businesses WHERE func_name='{business_func_name}'""")
         business_id = cursor.fetchone()[0]
         cursor.execute(f"""INSERT INTO users_to_businesses (user_id, business_id) VALUES ({user_id}, {business_id});""")
-        return 'Business added successfully'
+        return 'Business bought successfully'
