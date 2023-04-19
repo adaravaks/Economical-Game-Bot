@@ -1,7 +1,7 @@
 from decouple import config
 from random import randint
 from aiogram import Bot, Dispatcher, executor, types
-from database_handler import add_user, user_exists, get_user_money, get_leaderboard, user_in_leaderboard, bonus_available, change_money
+from database_handler import add_user, user_exists, get_user_money, get_leaderboard, user_in_leaderboard, bonus_available, change_money, get_business_price, buy_business
 import markups
 
 
@@ -111,7 +111,16 @@ async def shop_menu(message: types.Message):
 
 @dp.callback_query_handler(text='buy_kiosk')
 async def buy_kiosk(message: types.Message):
-    pass
+    username = message.from_user.username
+    business_func_name = 'киоск_с_газетами'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id, "I am sorry, but you don't have enough money to make purchases like that. Going debt is not the option either, so leash your ambitions.")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой киоска с газетами')
+    except:
+        await bot.send_message(message.from_user.id, 'Что-то наебнулось')
 
 
 if __name__ == '__main__':

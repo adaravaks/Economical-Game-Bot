@@ -154,3 +154,17 @@ def buy_business(username, business_func_name):  # TODO: It has to be made sure 
         business_id = cursor.fetchone()[0]
         cursor.execute(f"""INSERT INTO users_to_businesses (user_id, business_id) VALUES ({user_id}, {business_id});""")
         return 'Business bought successfully'
+
+
+def get_business_price(business_func_name):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT price FROM businesses WHERE func_name='{business_func_name}'""")
+        return cursor.fetchone()[0]
