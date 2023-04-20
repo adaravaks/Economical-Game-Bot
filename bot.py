@@ -121,7 +121,7 @@ async def buy_kiosk(message: types.Message):
         buy_business(username, business_func_name)
         await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой киоска с газетами')
     except:
-        await bot.send_message(message.from_user.id, 'Что-то наебнулось')
+        await bot.send_message(message.from_user.id, 'Покупка не удалась')
 
 
 @dp.callback_query_handler(text='business_overview')

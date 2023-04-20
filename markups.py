@@ -18,7 +18,7 @@ to_main_menu_btn = InlineKeyboardButton(text='⬅ Back to main menu', callback_d
 free_bonus_btn = InlineKeyboardButton(text='🫴 Get free bonus', callback_data='free_bonus')
 coin_flip_btn = InlineKeyboardButton(text='🪙 Play coin toss', callback_data='coin_toss_rules')
 
-buy_kiosk_btn = InlineKeyboardButton(text='Купить киоск с газетами 🗞', callback_data='buy_kiosk')
+buy_kiosk_btn = InlineKeyboardButton(text='🗞 Купить киоск с газетами', callback_data='buy_kiosk')
 
 main_menu.insert(user_checkout_btn)
 main_menu.insert(businesses_overview_btn)
