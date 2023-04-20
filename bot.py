@@ -1,7 +1,7 @@
 from decouple import config
 from random import randint
 from aiogram import Bot, Dispatcher, executor, types
-from database_handler import add_user, user_exists, get_user_money, get_leaderboard, user_in_leaderboard, bonus_available, change_money, get_business_price, buy_business
+from database_handler import add_user, user_exists, get_user_money, get_leaderboard, user_in_leaderboard, bonus_available, change_money, get_business_price, buy_business, get_user_businesses
 import markups
 
 
@@ -76,6 +76,7 @@ async def back_to_menu(message: types.Message):
 
 @dp.callback_query_handler(text='show_leaderboard')
 async def show_leaderboard(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
     leaderboard = get_leaderboard()
     str_leaderboard = ''
     for player_index in range(len(leaderboard[:10])):
@@ -121,6 +122,18 @@ async def buy_kiosk(message: types.Message):
         await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой киоска с газетами')
     except:
         await bot.send_message(message.from_user.id, 'Что-то наебнулось')
+
+
+@dp.callback_query_handler(text='business_overview')
+async def business_overview(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    username = message.from_user.username
+    overview = ''
+    businesses = get_user_businesses(username)
+
+    for business_name in businesses.keys():
+        overview += f'{business_name}: {businesses[business_name]}\n'
+    await bot.send_message(message.from_user.id, overview, reply_markup=markups.to_main_menu)
 
 
 if __name__ == '__main__':

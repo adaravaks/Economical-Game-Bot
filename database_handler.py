@@ -168,3 +168,40 @@ def get_business_price(business_func_name):
     with connection.cursor() as cursor:
         cursor.execute(f"""SELECT price FROM businesses WHERE func_name='{business_func_name}'""")
         return cursor.fetchone()[0]
+
+
+def get_business_name_by_id(business_id):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT name FROM businesses WHERE id='{business_id}'""")
+        return cursor.fetchone()[0]
+
+
+def get_user_businesses(username):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT id FROM users WHERE username='{username}'""")
+        user_id = cursor.fetchone()[0]
+        cursor.execute(f"""SELECT * FROM users_to_businesses WHERE user_id='{user_id}'""")
+
+        businesses_raw = cursor.fetchall()
+        businesses_ids = [i[2] for i in businesses_raw]
+
+        businesses_dict = {}
+        for distinct_business_id in set(businesses_ids):
+            businesses_dict[get_business_name_by_id(distinct_business_id)] = businesses_ids.count(distinct_business_id)
+        return businesses_dict
