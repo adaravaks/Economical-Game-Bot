@@ -210,7 +210,33 @@ def get_user_businesses(username):
         return businesses_dict
 
 
-def receive_business_profit(username):  # TODO: If user with no businesses reaches this function, bot will crash. Fix that.
+def check_business_profit(username):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT profit_claim_time FROM users WHERE username='{username}'""")
+        timestamp_claim = datetime.strptime(str(cursor.fetchone()[0]), '%Y-%m-%d %H:%M:%S.%f')
+        timestamp_now = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
+        hours_passed = (timestamp_now - timestamp_claim).total_seconds() // 3600
+
+    businesses = get_user_businesses(username)
+    total_profit = 0
+    with connection.cursor() as cursor:
+        for business_name in businesses.keys():
+            cursor.execute(f"""SELECT hour_profit FROM businesses WHERE name='{business_name}'""")
+            hour_profit = cursor.fetchone()[0]
+            quantity = businesses[business_name]
+            total_profit += quantity * hour_profit * hours_passed
+    return total_profit
+
+
+def receive_business_profit(username):
     connection = psycopg2.connect(
         host=config('HOST'),
         user=config('USER'),
@@ -235,7 +261,14 @@ def receive_business_profit(username):  # TODO: If user with no businesses reach
             quantity = businesses[business_name]
             total_profit += quantity * hour_profit * hours_passed
 
-        new_money = get_user_money(username) + total_profit
-        cursor.execute(f"""UPDATE users SET money='{int(new_money)}' WHERE username='{username}'""")
+    new_money = int(get_user_money(username) + total_profit)
+    with connection.cursor() as cursor:
+        cursor.execute(f"""UPDATE users SET money='{new_money}' WHERE username='{username}'""")
         cursor.execute(f"""UPDATE users SET profit_claim_time='{timestamp_new_claim}' WHERE username='{username}'""")
-        return 'Profit received successfully'
+        return 'Profit received'
+
+
+print(check_business_profit('Giorno'))
+receive_business_profit('Giorno')
+print(get_user_money('Giorno'))
+print(check_business_profit('Giorno'))

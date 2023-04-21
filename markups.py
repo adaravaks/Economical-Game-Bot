@@ -7,16 +7,17 @@ money_menu = InlineKeyboardMarkup(row_width=2)
 shop_menu = InlineKeyboardMarkup(row_width=2)
 to_menus = InlineKeyboardMarkup(row_width=3)
 
-user_checkout_btn = InlineKeyboardButton(text='Хто я?', callback_data='user_checkout')
-show_leaderboard_btn = InlineKeyboardButton(text='🏆 Leaderboard', callback_data='show_leaderboard')
-businesses_overview_btn = InlineKeyboardButton(text='🏦 Мои бизнесы', callback_data='business_overview')
+user_checkout_btn = InlineKeyboardButton(text='👤 Мой профиль', callback_data='user_checkout')
+show_leaderboard_btn = InlineKeyboardButton(text='🏆 Список богачей', callback_data='show_leaderboard')
+businesses_overview_btn = InlineKeyboardButton(text='🏦 Мои предприятия', callback_data='business_overview')
 
-to_money_menu_btn = InlineKeyboardButton(text='💰 Gambling', callback_data='to_money_menu')
-to_shop_menu_btn = InlineKeyboardButton(text='💸 Shop', callback_data='to_shop_menu')
-to_main_menu_btn = InlineKeyboardButton(text='⬅ Back to main menu', callback_data='to_main_menu')
+to_money_menu_btn = InlineKeyboardButton(text='🎰 Азартные игры', callback_data='to_money_menu')
+to_shop_menu_btn = InlineKeyboardButton(text='💸 Магазин', callback_data='to_shop_menu')
+to_main_menu_btn = InlineKeyboardButton(text='⬅ В главное меню', callback_data='to_main_menu')
 
-free_bonus_btn = InlineKeyboardButton(text='🫴 Get free bonus', callback_data='free_bonus')
-coin_flip_btn = InlineKeyboardButton(text='🪙 Play coin toss', callback_data='coin_toss_rules')
+free_bonus_btn = InlineKeyboardButton(text='🫴 Получить бесплатный бонус', callback_data='free_bonus')
+receive_profit_btn = InlineKeyboardButton(text='💰 Забрать прибыль от предприятий', callback_data='receive_profit')
+coin_flip_btn = InlineKeyboardButton(text='🪙 Бросок монеты', callback_data='coin_toss_rules')
 
 buy_kiosk_btn = InlineKeyboardButton(text='🗞 Купить киоск с газетами', callback_data='buy_kiosk')
 
