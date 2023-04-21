@@ -267,8 +267,3 @@ def receive_business_profit(username):
         cursor.execute(f"""UPDATE users SET profit_claim_time='{timestamp_new_claim}' WHERE username='{username}'""")
         return 'Profit received'
 
-
-print(check_business_profit('Giorno'))
-receive_business_profit('Giorno')
-print(get_user_money('Giorno'))
-print(check_business_profit('Giorno'))
