@@ -1,19 +1,19 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
-main_menu = InlineKeyboardMarkup(row_width=2)
+main_menu = InlineKeyboardMarkup(row_width=1)
 to_main_menu = InlineKeyboardMarkup(row_width=1)
-gambling_menu = InlineKeyboardMarkup(row_width=2)
-shop_menu = InlineKeyboardMarkup(row_width=2)
-to_menus = InlineKeyboardMarkup(row_width=3)
-receive_profit = InlineKeyboardMarkup(row_width=2)
+gambling_menu = InlineKeyboardMarkup(row_width=1)
+shop_menu = InlineKeyboardMarkup(row_width=1)
+to_menus = InlineKeyboardMarkup(row_width=1)
+receive_profit = InlineKeyboardMarkup(row_width=1)
 
 user_checkout_btn = InlineKeyboardButton(text='👤 Мой профиль', callback_data='user_checkout')
 show_leaderboard_btn = InlineKeyboardButton(text='🏆 Список богачей', callback_data='show_leaderboard')
 businesses_overview_btn = InlineKeyboardButton(text='🏦 Мои предприятия', callback_data='business_overview')
 
 to_money_menu_btn = InlineKeyboardButton(text='🎰 Азартные игры', callback_data='to_money_menu')
-to_shop_menu_btn = InlineKeyboardButton(text='💸 Магазин', callback_data='to_shop_menu')
+to_shop_menu_btn = InlineKeyboardButton(text='💸 Бизнес-магазин', callback_data='to_shop_menu')
 to_main_menu_btn = InlineKeyboardButton(text='⬅ В главное меню', callback_data='to_main_menu')
 
 free_bonus_btn = InlineKeyboardButton(text='🫴 Получить бесплатный бонус', callback_data='free_bonus')
