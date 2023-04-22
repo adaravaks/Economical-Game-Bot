@@ -18,6 +18,7 @@ to_main_menu_btn = InlineKeyboardButton(text='⬅ В главное меню', c
 
 free_bonus_btn = InlineKeyboardButton(text='🫴 Получить бесплатный бонус', callback_data='free_bonus')
 coin_flip_btn = InlineKeyboardButton(text='🪙 Бросок монеты', callback_data='coin_toss_rules')
+roulette_btn = InlineKeyboardButton(text='🔴⚫ Рулетка', callback_data='roulette_rules')
 
 check_profit_btn = InlineKeyboardButton(text='💰 Прибыль от предприятий', callback_data='check_profit')
 receive_profit_btn = InlineKeyboardButton(text='🤑 Забрать', callback_data='receive_profit')
@@ -32,6 +33,7 @@ main_menu.insert(to_shop_menu_btn)
 
 gambling_menu.insert(free_bonus_btn)
 gambling_menu.insert(coin_flip_btn)
+gambling_menu.insert(roulette_btn)
 gambling_menu.insert(to_main_menu_btn)
 
 shop_menu.insert(buy_kiosk_btn)

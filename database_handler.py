@@ -266,4 +266,3 @@ def receive_business_profit(username):
         cursor.execute(f"""UPDATE users SET money='{new_money}' WHERE username='{username}'""")
         cursor.execute(f"""UPDATE users SET profit_claim_time='{timestamp_new_claim}' WHERE username='{username}'""")
         return 'Profit received'
-
