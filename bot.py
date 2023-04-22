@@ -3,7 +3,7 @@ from random import randint, choice
 from aiogram import Bot, Dispatcher, executor, types
 from database_handler import add_user, user_exists, get_user_money, get_leaderboard, user_in_leaderboard, \
     bonus_available, change_money, get_business_price, buy_business, get_user_businesses, check_business_profit, \
-    receive_business_profit
+    receive_business_profit, get_business_price_and_profit_by_funcname
 import markups
 
 bot = Bot(token=config('TOKEN'))
@@ -168,7 +168,7 @@ async def show_leaderboard(message: types.Message):
     await bot.send_message(message.from_user.id, str_leaderboard, reply_markup=markups.to_main_menu)
 
 
-@dp.callback_query_handler(text='to_money_menu')
+@dp.callback_query_handler(text='to_gambling_menu')
 async def to_money_menu(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
     await bot.send_message(message.from_user.id, '🎰 Хочешь ощутить настоящий азарт и заработать небывалые деньги, а не ждать копейки дохода от предприятий? Тогда ты по адресу!🤩💰\n\n😉 Но учти, что разориться здесь также легко, как и разбогатеть.', reply_markup=markups.gambling_menu)
@@ -199,6 +199,11 @@ async def shop_menu(message: types.Message):
                            reply_markup=markups.shop_menu)
 
 
+@dp.callback_query_handler(text='check_kiosk')
+async def check_kiosk(message: types.Message):
+    await bot.send_message(message.from_user.id, f'🔵  🗞 Киоск с газетами — выгодное вложение, если ты ещё только в самом начале твоего пути к обогащению.\n  🔹 Цена: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[0]}\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[1]}\n\n Купить?', reply_markup=markups.buy_kiosk)
+
+
 @dp.callback_query_handler(text='buy_kiosk')
 async def buy_kiosk(message: types.Message):
     username = message.from_user.username
@@ -221,8 +226,14 @@ async def business_overview(message: types.Message):
     overview = ''
     businesses = get_user_businesses(username)
 
-    for business_name in businesses.keys():
-        overview += f'{business_name}: {businesses[business_name]}\n'
+    if businesses:
+        for business_name in businesses.keys():
+            overview += f'🔵  {business_name}:\n    🔹  {businesses[business_name]}\n\n'
+    else:
+        await bot.send_message(message.from_user.id,
+                               '❌ Что ты надеешься здесь увидеть, не имея ни одного предприятия?',
+                               reply_markup=markups.to_main_menu)
+        return None
     await bot.send_message(message.from_user.id, overview, reply_markup=markups.to_main_menu)
 
 
@@ -232,7 +243,7 @@ async def check_profit(message: types.Message):
     username = message.from_user.username
     if not get_user_businesses(username):
         await bot.send_message(message.from_user.id,
-                               '❌ Да у тебя ведь ни одного предприятия нет, что это ты забрать удумал?',
+                               '❌ Какая ещё прибыль? Ты для начала хоть одним предприятием обзаведись.',
                                reply_markup=markups.to_main_menu)
     else:
         await bot.send_message(message.from_user.id,

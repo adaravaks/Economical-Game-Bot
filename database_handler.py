@@ -187,6 +187,24 @@ def get_business_name_by_id(business_id):
         return cursor.fetchone()[0]
 
 
+def get_business_price_and_profit_by_funcname(business_funcname):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        lst = []
+        cursor.execute(f"""SELECT price FROM businesses WHERE func_name='{business_funcname}'""")
+        lst.append(cursor.fetchone()[0])
+        cursor.execute(f"""SELECT hour_profit FROM businesses WHERE func_name='{business_funcname}'""")
+        lst.append(cursor.fetchone()[0])
+        return lst
+
+
 def get_user_businesses(username):
     connection = psycopg2.connect(
         host=config('HOST'),
