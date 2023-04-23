@@ -163,7 +163,7 @@ async def show_leaderboard(message: types.Message):
     leaderboard = get_leaderboard()
     str_leaderboard = '💎 Самые богатые игроки 💎\n\n'
     for player_index in range(len(leaderboard[:10])):
-        str_leaderboard += f'{player_index + 1}. {leaderboard[player_index][1]}: {leaderboard[player_index][2]} 💵\n'  # Leaderboard position, then username, then user's money
+        str_leaderboard += f'🔹  {player_index + 1}. {leaderboard[player_index][1]}: {leaderboard[player_index][2]} 💵\n'  # Leaderboard position, then username, then user's money
     str_leaderboard += '\n😼 Лишь самые упорные, предприимчивые и везучие смогут стать частью этого списка'
     await bot.send_message(message.from_user.id, str_leaderboard, reply_markup=markups.to_main_menu)
 
@@ -189,7 +189,7 @@ async def free_bonus(message: types.Message):
 @dp.callback_query_handler(text='coin_toss_rules')
 async def coin_toss_rules(message: types.Message):
     await bot.send_message(message.from_user.id,
-                           f'🪙 Бросок монеты, значит? Отличный выбор! Вот правила:\nЧтобы подбросить монету, вам нужно ввести команду "/coin_toss", дописать к ней исход броска (орёл/решка) и сумму вашей ставки, а затем отправить в чат. Вот пример того, как должна выглядеть команда:\n\n/coin_toss {"орёл" if randint(0, 1) == 0 else "решка"} {randint(100, 10000)}\n\nПомни, что нельзя ставить больше денег, чем у тебя есть. 😉')
+                           f'🪙 Бросок монеты, значит? Отличный выбор! Вот правила:\n\nЧтобы подбросить монету, вам нужно ввести команду "/coin_toss", дописать к ней исход броска (орёл/решка) и сумму вашей ставки, а затем отправить в чат.\nВот пример того, как должна выглядеть команда:\n\n/coin_toss {"орёл" if randint(0, 1) == 0 else "решка"} {randint(100, 10000)}\n\nПомни, что нельзя ставить больше денег, чем у тебя есть. 😉')
 
 
 @dp.callback_query_handler(text='to_shop_menu')
@@ -201,7 +201,7 @@ async def shop_menu(message: types.Message):
 
 @dp.callback_query_handler(text='check_kiosk')
 async def check_kiosk(message: types.Message):
-    await bot.send_message(message.from_user.id, f'🔵  🗞 Киоск с газетами — выгодное вложение, если ты ещё только в самом начале твоего пути к обогащению.\n  🔹 Цена: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[0]}\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[1]}\n\n Купить?', reply_markup=markups.buy_kiosk)
+    await bot.send_message(message.from_user.id, f'🔵  🗞 Киоск с газетами — выгодное вложение, если ты ещё только в самом начале твоего пути к обогащению.\n  🔹 Цена: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_kiosk)
 
 
 @dp.callback_query_handler(text='buy_kiosk')

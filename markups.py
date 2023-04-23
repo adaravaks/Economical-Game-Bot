@@ -29,12 +29,12 @@ buy_kiosk_btn = InlineKeyboardButton(text='👍 Купить', callback_data='bu
 
 main_menu.insert(user_checkout_btn)
 main_menu.insert(show_leaderboard_btn)
+main_menu.insert(free_bonus_btn)
 main_menu.insert(to_gambling_menu_btn)
 main_menu.insert(to_shop_menu_btn)
 main_menu.insert(businesses_overview_btn)
 main_menu.insert(check_profit_btn)
 
-gambling_menu.insert(free_bonus_btn)
 gambling_menu.insert(coin_flip_btn)
 gambling_menu.insert(roulette_btn)
 gambling_menu.insert(to_main_menu_btn)

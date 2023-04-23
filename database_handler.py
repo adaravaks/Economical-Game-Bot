@@ -17,6 +17,20 @@ def add_user(username, money):
         return f'User {username} was successfully added'
 
 
+def add_business(name, func_name, price, hour_profit):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""INSERT INTO businesses (name, func_name, price, hour_profit) VALUES ('{name}', '{func_name}', {price}, {hour_profit});""")
+        return f'Business {name} was successfully added'
+
+
 def user_exists(username):
     connection = psycopg2.connect(
         host=config('HOST'),
