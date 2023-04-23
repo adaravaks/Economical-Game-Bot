@@ -73,6 +73,14 @@ gambling_menu.insert(roulette_btn)
 gambling_menu.insert(to_main_menu_btn)
 
 shop_menu.insert(check_kiosk_btn)
+shop_menu.insert(check_apiary_btn)
+shop_menu.insert(check_carwash_btn)
+shop_menu.insert(check_cafe_btn)
+shop_menu.insert(check_cottages_btn)
+shop_menu.insert(check_tvshow_btn)
+shop_menu.insert(check_bank_btn)
+shop_menu.insert(check_pmc_btn)
+shop_menu.insert(check_spacecolonies_btn)
 shop_menu.insert(to_main_menu_btn)
 
 to_main_menu.insert(to_main_menu_btn)
@@ -85,28 +93,37 @@ receive_profit.insert(receive_profit_btn)
 receive_profit.insert(to_main_menu_btn)
 
 buy_kiosk.insert(buy_kiosk_btn)
+buy_kiosk.insert(to_shop_menu_btn)
 buy_kiosk.insert(to_main_menu_btn)
 
 buy_apiary.insert(buy_apiary_btn)
+buy_apiary.insert(to_shop_menu_btn)
 buy_apiary.insert(to_main_menu_btn)
 
 buy_carwash.insert(buy_carwash_btn)
+buy_carwash.insert(to_shop_menu_btn)
 buy_carwash.insert(to_main_menu_btn)
 
 buy_cafe.insert(buy_cafe_btn)
+buy_cafe.insert(to_shop_menu_btn)
 buy_cafe.insert(to_main_menu_btn)
 
 buy_cottages.insert(buy_cottages_btn)
+buy_cottages.insert(to_shop_menu_btn)
 buy_cottages.insert(to_main_menu_btn)
 
 buy_tvshow.insert(buy_tvshow_btn)
+buy_tvshow.insert(to_shop_menu_btn)
 buy_tvshow.insert(to_main_menu_btn)
 
 buy_bank.insert(buy_bank_btn)
+buy_bank.insert(to_shop_menu_btn)
 buy_bank.insert(to_main_menu_btn)
 
 buy_pmc.insert(buy_pmc_btn)
+buy_pmc.insert(to_shop_menu_btn)
 buy_pmc.insert(to_main_menu_btn)
 
 buy_spacecolonies.insert(buy_spacecolonies_btn)
+buy_spacecolonies.insert(to_shop_menu_btn)
 buy_spacecolonies.insert(to_main_menu_btn)

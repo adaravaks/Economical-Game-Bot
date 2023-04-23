@@ -201,7 +201,8 @@ async def shop_menu(message: types.Message):
 
 @dp.callback_query_handler(text='check_kiosk')
 async def check_kiosk(message: types.Message):
-    await bot.send_message(message.from_user.id, f'🔵  🗞 Киоск с газетами — выгодное вложение, если ты ещё только в самом начале твоего пути к обогащению.\n  🔹 Цена: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_kiosk)
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  🗞 Киоск с газетами — выгодное вложение, если ты ещё только в самом начале твоего пути к обогащению.\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_kiosk)
 
 
 @dp.callback_query_handler(text='buy_kiosk')
@@ -214,7 +215,175 @@ async def buy_kiosk(message: types.Message):
         return None
     try:
         buy_business(username, business_func_name)
-        await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой киоска с газетами')
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой киоска с газетами! 🥳')
+    except:
+        await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
+
+
+@dp.callback_query_handler(text='check_apiary')
+async def check_apiary(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  🍯 Пчелиная пасека поможет тебе заполнить карманы либо деньгами, либо мёдом — смотря что больше по душе. Но тебе ведь по душе деньги, да? 😉\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("пчелиная_пасека")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("пчелиная_пасека")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_apiary)
+
+
+@dp.callback_query_handler(text='buy_apiary')
+async def buy_apiary(message: types.Message):
+    username = message.from_user.username
+    business_func_name = 'пчелиная_пасека'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id,
+                               "❌ Извини, но денег тебе на такую покупку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции 😉")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой пчелиной пасеки! 🥳')
+    except:
+        await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
+
+
+@dp.callback_query_handler(text='check_carwash')
+async def check_carwash(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  🚗🧼 Автомойка помогала Уолтеру Уайту из "Во все тяжкие" отмывать деньги, заработанные при продаже метамфетамина. Нам до него ещё далеко, поэтому придётся использовать автомойку по прямому назначению. Зато никаких проблем с полицией, здорово же! 😌\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("автомойка")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("автомойка")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_carwash)
+
+
+@dp.callback_query_handler(text='buy_carwash')
+async def buy_carwash(message: types.Message):
+    username = message.from_user.username
+    business_func_name = 'автомойка'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id,
+                               "❌ Извини, но денег тебе на такую покупку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции 😉")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой автомойки! 🥳')
+    except:
+        await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
+
+
+@dp.callback_query_handler(text='check_cafe')
+async def check_cafe(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  🍛 Кафе — как заезженно! "Да эти кафешки уже на каждом углу стоят!" — ты, наверное, подумал. Но подумал ли ты, каким прибыльным делом может оказаться общепит, если подойти с умом? Давай так: ты купишь кафе, а я прослежу, чтобы оно приносило тебе прибыль. По рукам? 🤖🤝😎\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("кафе")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("кафе")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_cafe)
+
+
+@dp.callback_query_handler(text='buy_cafe')
+async def buy_cafe(message: types.Message):
+    username = message.from_user.username
+    business_func_name = 'кафе'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id,
+                               "❌ Извини, но денег тебе на такую покупку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции 😉")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой кафе! 🥳')
+    except:
+        await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
+
+
+@dp.callback_query_handler(text='check_cottages')
+async def check_cottages(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  🏘 Коттеджный посёлок в живописном месте — настоящий магнит для туристов и их кошельков. Найдём просторную лужайку где-нибудь возле красивого озера, силами гастарбайтеров построим там несколько домиков, а потом начнём грести деньги лопатой! Как тебе идея? 🤩\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("коттеджный_посёлок")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("коттеджный_посёлок")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_cottages)
+
+
+@dp.callback_query_handler(text='buy_cottages')
+async def buy_cottages(message: types.Message):
+    username = message.from_user.username
+    business_func_name = 'коттеджный_посёлок'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id,
+                               "❌ Извини, но денег тебе на такую покупку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции 😉")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой коттеджного посёлка! 🥳')
+    except:
+        await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
+
+
+@dp.callback_query_handler(text='check_tvshow')
+async def check_tvshow(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  📽 ТВ-шоу со звёздами будет притягивать к себе внимание уставших работяг, пришедших вечером с работы и желающих отдохнуть перед телевизором с бутылкой какой-нибудь бурды. Чем больше мы таких соберём перед экранами — тем больше денег получим от рекламных пауз. Конечно, огромные рейтинги требуют огромной зрелищности, но эту часть я готов взять на себя. Ну что, порвём экраны? 😈\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("тв_шоу_со_звёздами")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("тв_шоу_со_звёздами")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_tvshow)
+
+
+@dp.callback_query_handler(text='buy_tvshow')
+async def buy_tvshow(message: types.Message):
+    username = message.from_user.username
+    business_func_name = 'тв_шоу_со_звёздами'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id,
+                               "❌ Извини, но денег тебе на такую покупку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции 😉")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с запуском своего собственного ТВ-шоу! 🥳')
+    except:
+        await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
+
+
+@dp.callback_query_handler(text='check_bank')
+async def check_bank(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  🏦 Банк. Хватит ребячества, пора заняться серьёзным делом. Оседлаем этого капиталистического зверя — и сможем сосредоточить у себя капитал, которого доселе ты и во снах не видел. Ты со мной? 😏\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("банк")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("банк")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_bank)
+
+
+@dp.callback_query_handler(text='buy_bank')
+async def buy_bank(message: types.Message):
+    username = message.from_user.username
+    business_func_name = 'банк'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id,
+                               "❌ Извини, но денег тебе на такую покупку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции 😉")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с покупкой банка! 🥳')
+    except:
+        await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
+
+
+@dp.callback_query_handler(text='check_pmc')
+async def check_pmc(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  💣 Частная военная компания — отбрось мораль и стань ещё богаче! Война — очень прибыльное дело, ты знал об этом? Если не станешь глупить и брезговать кровавыми деньгами, то со временем перед твоим богатством откроются все двери этого мира. Готов устроить мясорубку? 👹\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("частная_военная_компания")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("частная_военная_компания")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_pmc)
+
+
+@dp.callback_query_handler(text='buy_pmc')
+async def buy_pmc(message: types.Message):
+    username = message.from_user.username
+    business_func_name = 'частная_военная_компания'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id,
+                               "❌ Извини, но денег тебе на такую покупку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции 😉")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с основанием ЧВК! 😈')
+    except:
+        await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
+
+
+@dp.callback_query_handler(text='check_spacecolonies')
+async def check_spacecolonies(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id, f'🔵  🚀 Колонизация космоса станет твоим триумфальным последним шагом. Когда Земля больше не способна удовлетворить твои потребности, всё, что остаётся — отправиться за её пределы. Цена такой кампании, действительно, космическая, но потенциальная прибыль точно стоит всех твоих затрат. Дерзнёшь рвануть в космос? 🌌\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("колонизация_космоса")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("колонизация_космоса")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_spacecolonies)
+
+
+@dp.callback_query_handler(text='buy_spacecolonies')
+async def buy_spacecolonies(message: types.Message):
+    username = message.from_user.username
+    business_func_name = 'колонизация_космоса'
+    if get_user_money(username) < get_business_price(business_func_name):
+        await bot.send_message(message.from_user.id,
+                               "❌ Извини, но денег тебе на такую покупку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции 😉")
+        return None
+    try:
+        buy_business(username, business_func_name)
+        await bot.send_message(message.from_user.id, '✅ Поздравляю с началом космической экспансии! 🚀🥳\nМожешь считать, что игра пройдена:)')
     except:
         await bot.send_message(message.from_user.id, '❌ Покупка не удалась')
 
