@@ -452,10 +452,17 @@ async def check_profit(message: types.Message):
         await bot.send_message(message.from_user.id,
                                '❌ Какая ещё прибыль? Ты для начала хоть одним предприятием обзаведись.',
                                reply_markup=markups.to_main_menu)
-    else:
+    elif sum(calculate_business_profit(username).values()) == 0:
         await bot.send_message(message.from_user.id,
-                               f'🕓 За то время, что тебя не было, твои предприятия заработали тебе {check_business_profit(username)} 💵\nСолидная сумма! Хочешь её забрать? 😉',
+                               f'❌ Твои предприятия ещё не успели ничего заработать. Я, конечно, нанял самых лучших управляющих, но и они не сверхлюди. Дай им немного времени, а? 😉',
                                reply_markup=markups.receive_profit)
+    else:
+        profits = calculate_business_profit(username)
+        msg = f'За то время, что тебя не было, твои предприятия заработали тебе {sum(profits.values())} 💵.\nПодробнее:\n\n'
+        for business_name in profits.keys():
+            msg += f'🔵  {business_name}:\n    🔹  Прибыль: {profits[business_name]}\n\n'
+        msg += 'Солидная сумма! Хочешь её забрать? 😉'
+        await bot.send_message(message.from_user.id, msg, reply_markup=markups.receive_profit)
 
 
 @dp.callback_query_handler(text='receive_profit')

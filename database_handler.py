@@ -328,7 +328,6 @@ def calculate_business_profit(username):
             timestamp_claim = datetime.strptime(str(tpl[0]), '%Y-%m-%d %H:%M:%S.%f')
             timestamp_now = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
             hours_passed = (timestamp_now - timestamp_claim).total_seconds() // 3600
-            timestamp_new_claim = timestamp_claim + timedelta(hours=hours_passed)
 
             single_business_profit = int(tpl[2]) * hours_passed
             try:
