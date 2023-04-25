@@ -160,16 +160,13 @@ def buy_business(username, business_func_name):  # TODO: It has to be made sure 
         user_money = cursor.fetchone()[0]
         new_user_money = user_money - business_price
         cursor.execute(f"""UPDATE users SET money={new_user_money} WHERE username='{username}'""")
-        cursor.execute(f"""SELECT profit_claim_time FROM users WHERE username='{username}'""")
-        if not cursor.fetchone()[0]:
-            cursor.execute(f"""UPDATE users SET profit_claim_time='{datetime.now()}' WHERE username='{username}'""")
 
     with connection.cursor() as cursor:
         cursor.execute(f"""SELECT id FROM users WHERE username='{username}'""")
         user_id = cursor.fetchone()[0]
         cursor.execute(f"""SELECT id FROM businesses WHERE func_name='{business_func_name}'""")
         business_id = cursor.fetchone()[0]
-        cursor.execute(f"""INSERT INTO users_to_businesses (user_id, business_id, profit_claim_time) VALUES ({user_id}, {business_id}, {str(datetime.now())});""")
+        cursor.execute(f"""INSERT INTO users_to_businesses (user_id, business_id, profit_claim_time) VALUES ({user_id}, {business_id}, '{datetime.now()}');""")
         return 'Business bought successfully'
 
 
@@ -243,29 +240,7 @@ def get_user_businesses(username):
 
 
 def check_business_profit(username):
-    connection = psycopg2.connect(
-        host=config('HOST'),
-        user=config('USER'),
-        password=config('PASSWORD'),
-        database=config('DB_NAME')
-    )
-    connection.autocommit = True
-
-    with connection.cursor() as cursor:
-        cursor.execute(f"""SELECT profit_claim_time FROM users WHERE username='{username}'""")
-        timestamp_claim = datetime.strptime(str(cursor.fetchone()[0]), '%Y-%m-%d %H:%M:%S.%f')
-        timestamp_now = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
-        hours_passed = (timestamp_now - timestamp_claim).total_seconds() // 3600
-
-    businesses = get_user_businesses(username)
-    total_profit = 0
-    with connection.cursor() as cursor:
-        for business_name in businesses.keys():
-            cursor.execute(f"""SELECT hour_profit FROM businesses WHERE name='{business_name}'""")
-            hour_profit = cursor.fetchone()[0]
-            quantity = businesses[business_name]
-            total_profit += quantity * hour_profit * hours_passed
-    return total_profit
+    return sum(calculate_business_profit(username).values())
 
 
 def receive_business_profit(username):
@@ -278,26 +253,35 @@ def receive_business_profit(username):
     connection.autocommit = True
 
     with connection.cursor() as cursor:
-        cursor.execute(f"""SELECT profit_claim_time FROM users WHERE username='{username}'""")
-        timestamp_claim = datetime.strptime(str(cursor.fetchone()[0]), '%Y-%m-%d %H:%M:%S.%f')
-        timestamp_now = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
-        hours_passed = (timestamp_now - timestamp_claim).total_seconds() // 3600
-        timestamp_new_claim = timestamp_claim + timedelta(hours=hours_passed)
+        cursor.execute(f"""SELECT id FROM users WHERE username='{username}'""")
+        user_id = cursor.fetchone()[0]
+        cursor.execute(
+            f"""SELECT relation_id FROM users_to_businesses WHERE user_id={user_id}""")
+        relations_id_list = []
+        for tpl in cursor.fetchall():
+            for num in tpl:
+                relations_id_list.append(num)
 
-    businesses = get_user_businesses(username)
     total_profit = 0
-    with connection.cursor() as cursor:
-        for business_name in businesses.keys():
-            cursor.execute(f"""SELECT hour_profit FROM businesses WHERE name='{business_name}'""")
-            hour_profit = cursor.fetchone()[0]
-            quantity = businesses[business_name]
-            total_profit += quantity * hour_profit * hours_passed
+    for relation_id in relations_id_list:
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""SELECT profit_claim_time, name, hour_profit FROM users_to_businesses JOIN businesses ON business_id = id WHERE relation_id={int(relation_id)}""")
+            tpl = cursor.fetchone()
 
-    new_money = int(get_user_money(username) + total_profit)
+            timestamp_claim = datetime.strptime(str(tpl[0]), '%Y-%m-%d %H:%M:%S.%f')
+            timestamp_now = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
+            hours_passed = int((timestamp_now - timestamp_claim).total_seconds() // 3600)
+            timestamp_new_claim = timestamp_claim + timedelta(hours=hours_passed)
+
+            total_profit += int(tpl[2]) * hours_passed
+
+            cursor.execute(f"""UPDATE users_to_businesses SET profit_claim_time='{timestamp_new_claim}' WHERE relation_id={int(relation_id)}""")
+
     with connection.cursor() as cursor:
-        cursor.execute(f"""UPDATE users SET money='{new_money}' WHERE username='{username}'""")
-        cursor.execute(f"""UPDATE users SET profit_claim_time='{timestamp_new_claim}' WHERE username='{username}'""")
-        return 'Profit received'
+        new_money = get_user_money(username) + total_profit
+        cursor.execute(f"""UPDATE users SET money={new_money} WHERE username='{username}'""")
+    return 'Profit received'
 
 
 def calculate_business_profit(username):
