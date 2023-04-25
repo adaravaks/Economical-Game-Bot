@@ -4,7 +4,7 @@ from random import randint, choice
 from aiogram import Bot, Dispatcher, executor, types
 from database_handler import add_user, user_exists, get_user_money, get_leaderboard, user_in_leaderboard, \
     bonus_available, change_money, get_business_price, buy_business, get_user_businesses, check_business_profit, \
-    receive_business_profit, get_business_price_and_profit_by_funcname
+    receive_business_profit, get_business_price_and_profit_by_funcname, calculate_business_profit
 import markups
 
 bot = Bot(token=config('TOKEN'))
@@ -429,12 +429,13 @@ async def buy_spacecolonies(message: types.Message):
 async def business_overview(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
     username = message.from_user.username
-    overview = ''
+    overview = '🤩 Вот, взгляни, чего мы уже добились:\n\n'
     businesses = get_user_businesses(username)
 
     if businesses:
+        profits = calculate_business_profit(username)
         for business_name in businesses.keys():
-            overview += f'🔵  {business_name}:\n    🔹  {businesses[business_name]}\n\n'
+            overview += f'🔵  {business_name}:\n    🔹  Количество: {businesses[business_name]}\n    🔹  Прибыль: {profits[business_name]}\n\n'
     else:
         await bot.send_message(message.from_user.id,
                                '❌ Что ты надеешься здесь увидеть, не имея ни одного предприятия?',

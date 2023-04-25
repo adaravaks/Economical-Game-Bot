@@ -169,7 +169,7 @@ def buy_business(username, business_func_name):  # TODO: It has to be made sure 
         user_id = cursor.fetchone()[0]
         cursor.execute(f"""SELECT id FROM businesses WHERE func_name='{business_func_name}'""")
         business_id = cursor.fetchone()[0]
-        cursor.execute(f"""INSERT INTO users_to_businesses (user_id, business_id) VALUES ({user_id}, {business_id});""")
+        cursor.execute(f"""INSERT INTO users_to_businesses (user_id, business_id, profit_claim_time) VALUES ({user_id}, {business_id}, {str(datetime.now())});""")
         return 'Business bought successfully'
 
 
@@ -298,3 +298,42 @@ def receive_business_profit(username):
         cursor.execute(f"""UPDATE users SET money='{new_money}' WHERE username='{username}'""")
         cursor.execute(f"""UPDATE users SET profit_claim_time='{timestamp_new_claim}' WHERE username='{username}'""")
         return 'Profit received'
+
+
+def calculate_business_profit(username):
+    connection = psycopg2.connect(
+        host=config('HOST'),
+        user=config('USER'),
+        password=config('PASSWORD'),
+        database=config('DB_NAME')
+    )
+    connection.autocommit = True
+
+    with connection.cursor() as cursor:
+        cursor.execute(f"""SELECT id FROM users WHERE username='{username}'""")
+        user_id = cursor.fetchone()[0]
+        cursor.execute(
+            f"""SELECT relation_id FROM users_to_businesses WHERE user_id={user_id}""")
+        relations_id_list = []
+        for tpl in cursor.fetchall():
+            for num in tpl:
+                relations_id_list.append(num)
+
+    profit_dict = {}
+    for relation_id in relations_id_list:
+        with connection.cursor() as cursor:
+            cursor.execute(f"""SELECT profit_claim_time, name, hour_profit FROM users_to_businesses JOIN businesses ON business_id = id WHERE relation_id={int(relation_id)}""")
+            tpl = cursor.fetchone()
+
+            timestamp_claim = datetime.strptime(str(tpl[0]), '%Y-%m-%d %H:%M:%S.%f')
+            timestamp_now = datetime.strptime(str(datetime.now()), '%Y-%m-%d %H:%M:%S.%f')
+            hours_passed = (timestamp_now - timestamp_claim).total_seconds() // 3600
+            timestamp_new_claim = timestamp_claim + timedelta(hours=hours_passed)
+
+            single_business_profit = int(tpl[2]) * hours_passed
+            try:
+                profit_dict[tpl[1]] += int(single_business_profit)
+            except KeyError:
+                profit_dict[tpl[1]] = int(single_business_profit)
+
+    return profit_dict
