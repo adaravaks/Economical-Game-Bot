@@ -75,7 +75,7 @@ async def roulette(message: types.Message):
             if stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
-                return None  # Read as "break"
+                return None
 
             stake_outcome = msg_words[1]
             outcome_number = randint(0, 36)
@@ -118,7 +118,7 @@ async def roulette(message: types.Message):
             change_money(username, new_money)
             if outcome == 'Win':
                 await message.answer(
-                    f'🥳 Ура, победа!\n\n Шарик рулетки упал на:\n{outcome_emoji}  {outcome_number},  {outcome_oddeven}\n\nТы выиграл, поставив на {stake_outcome}, поэтому твоя ставка возвращается к тебе в  {str(money_multiplier)+"-х" if money_multiplier != 36 else str(money_multiplier)+"-и"} кратном размере.\nВ твоём кошельке внезапно оказались дополнительные {(stake_money * money_multiplier) - stake_money} 💵.\nЕсли уверен, что удача тебя не подведёт, можешь сыграть в рулетку ещё разок.',
+                    f'🥳 Ура, победа!\n\n Шарик рулетки упал на:\n{outcome_emoji}  {outcome_number},  {outcome_oddeven}\n\nТы выиграл, поставив на {stake_outcome}, поэтому твоя ставка возвращается к тебе в {str(money_multiplier)+"-х" if money_multiplier != 36 else str(money_multiplier)+"-и"} кратном размере.\nВ твоём кошельке внезапно оказались дополнительные {(stake_money * money_multiplier) - stake_money} 💵.\nЕсли уверен, что удача тебя не подведёт, можешь сыграть в рулетку ещё разок.',
                     reply_markup=markups.to_menus)
             else:
                 await message.answer(
@@ -137,14 +137,14 @@ async def roulette(message: types.Message):
 @dp.message_handler(commands='dice')
 async def dice(message: types.Message):
     username = message.from_user.username
-    msg_words = message.text.split(' ')
+    msg_words = message.text.split()
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 3 and int(msg_words[1]) in range(1, 7):
             if stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
-                return None  # Read as "break"
+                return None
 
             stake_outcome = int(msg_words[1])
             outcome_raw = await message.answer_dice()
@@ -167,6 +167,42 @@ async def dice(message: types.Message):
     except:
         await message.reply(
             f'С твоей командой что-то не так. Вот как её надо вводить:\n/dice <число от 1 до 6> <твоя ставка>\n\nНапример:\n/dice {randint(1, 6)} {randint(100, 10000)}',
+            reply_markup=markups.to_menus)
+
+
+@dp.message_handler(commands='darts')
+async def darts(message: types.Message):
+    username = message.from_user.username
+    msg_words = message.text.split()
+    try:
+        stake_money = int(msg_words[-1])
+        if len(msg_words) == 2:
+            if stake_money > get_user_money(username):
+                await message.reply(
+                    f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
+                return None
+
+            outcome_raw = await message.answer_dice(emoji='🎯')
+            outcome = outcome_raw['dice']['value']
+            sleep(4)
+
+            if int(outcome) == 6:
+                change_money(username, (5 * stake_money))
+                await message.reply(
+                    f"🥳 Чётко в яблочко!.\n\nВ твоём кошельке внезапно оказались дополнительные {5 * stake_money} 💵.\nЕсли уверен, что удача тебя не подведёт, можешь бросить дротик ещё разок.",
+                    reply_markup=markups.to_menus)
+            else:
+                change_money(username, -stake_money)
+                await message.reply(
+                    f"😰 Мимо цели!\n\nТвои {stake_money} 💵 внезапно пропали из кошелька.\nМожет, получится отыграться, если бросить дротик ещё разок, хотя, с другой стороны, можно проиграть ещё больше. Выбор за тобой.",
+                    reply_markup=markups.to_menus)
+        else:
+            await message.reply(
+                f'С твоей командой что-то не так. Вот как её надо вводить:\n/darts <твоя ставка>\n\nНапример:\n/darts {randint(100, 10000)}',
+                reply_markup=markups.to_menus)
+    except:
+        await message.reply(
+            f'С твоей командой что-то не так. Вот как её надо вводить:\n/darts <твоя ставка>\n\nНапример:\n/darts {randint(100, 10000)}',
             reply_markup=markups.to_menus)
 
 
