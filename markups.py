@@ -31,6 +31,7 @@ coin_flip_btn = InlineKeyboardButton(text='🪙 Бросок монеты', call
 roulette_btn = InlineKeyboardButton(text='🔴⚫ Рулетка', callback_data='roulette_rules')
 dice_btn = InlineKeyboardButton(text='🎲 Бросок костей', callback_data='dice_rules')
 darts_btn = InlineKeyboardButton(text='🎯 Дартс', callback_data='darts_rules')
+basketball_btn = InlineKeyboardButton(text='🏀 Баскетбол', callback_data='basketball_rules')
 soccer_btn = InlineKeyboardButton(text='⚽ Футбол', callback_data='soccer_rules')
 
 check_profit_btn = InlineKeyboardButton(text='💰 Прибыль от предприятий', callback_data='check_profit')
@@ -75,6 +76,7 @@ gambling_menu.insert(coin_flip_btn)
 gambling_menu.insert(roulette_btn)
 gambling_menu.insert(dice_btn)
 gambling_menu.insert(darts_btn)
+gambling_menu.insert(basketball_btn)
 gambling_menu.insert(soccer_btn)
 gambling_menu.insert(to_main_menu_btn)
 
