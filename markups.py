@@ -34,6 +34,7 @@ darts_btn = InlineKeyboardButton(text='🎯 Дартс', callback_data='darts_ru
 basketball_btn = InlineKeyboardButton(text='🏀 Баскетбол', callback_data='basketball_rules')
 soccer_btn = InlineKeyboardButton(text='⚽ Футбол', callback_data='soccer_rules')
 bowling_btn = InlineKeyboardButton(text='🎳 Боулинг', callback_data='bowling_rules')
+slotmachine_btn = InlineKeyboardButton(text='🎰 Слот-машина', callback_data='slotmachine_rules')
 
 check_profit_btn = InlineKeyboardButton(text='💰 Прибыль от предприятий', callback_data='check_profit')
 receive_profit_btn = InlineKeyboardButton(text='🤑 Забрать', callback_data='receive_profit')
@@ -80,6 +81,7 @@ gambling_menu.insert(darts_btn)
 gambling_menu.insert(basketball_btn)
 gambling_menu.insert(soccer_btn)
 gambling_menu.insert(bowling_btn)
+gambling_menu.insert(slotmachine_btn)
 gambling_menu.insert(to_main_menu_btn)
 
 shop_menu.insert(check_kiosk_btn)
