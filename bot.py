@@ -207,7 +207,7 @@ async def darts(message: types.Message):
 
 
 @dp.message_handler(commands='soccer')
-async def darts(message: types.Message):
+async def soccer(message: types.Message):
     username = message.from_user.username
     msg_words = message.text.split()
     try:
@@ -243,7 +243,7 @@ async def darts(message: types.Message):
 
 
 @dp.message_handler(commands='basketball')
-async def darts(message: types.Message):
+async def basketball(message: types.Message):
     username = message.from_user.username
     msg_words = message.text.split()
     try:
@@ -278,9 +278,45 @@ async def darts(message: types.Message):
             reply_markup=markups.to_menus)
 
 
+@dp.message_handler(commands='bowling')
+async def bowling(message: types.Message):
+    username = message.from_user.username
+    msg_words = message.text.split()
+    try:
+        stake_money = int(msg_words[-1])
+        if len(msg_words) == 2:
+            if stake_money > get_user_money(username):
+                await message.reply(
+                    f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
+                return None
+
+            outcome_raw = await message.answer_dice(emoji='🎳')
+            outcome = outcome_raw['dice']['value']
+            sleep(5)
+
+            if int(outcome) == 6:
+                change_money(username, (int(5 * stake_money)))
+                await message.reply(
+                    f"🥳 Страйк!\n\nВ твоём кошельке внезапно оказались дополнительные {int(5 * stake_money)} 💵.\nЕсли уверен, что удача тебя не подведёт, можешь запустить шар в кегли ещё разок.",
+                    reply_markup=markups.to_menus)
+            else:
+                change_money(username, -stake_money)
+                await message.reply(
+                    f"😰 Не все кегли сбиты!\n\nТвои {stake_money} 💵 внезапно пропали из кошелька.\nМожет, получится отыграться, если запустить шар в кегли ещё разок, хотя, с другой стороны, можно проиграть ещё больше. Выбор за тобой.",
+                    reply_markup=markups.to_menus)
+        else:
+            await message.reply(
+                f'С твоей командой что-то не так. Вот как её надо вводить:\n/bowling <твоя ставка>\n\nНапример:\n/bowling {randint(100, 10000)}',
+                reply_markup=markups.to_menus)
+    except:
+        await message.reply(
+            f'С твоей командой что-то не так. Вот как её надо вводить:\n/bowling <твоя ставка>\n\nНапример:\n/bowling {randint(100, 10000)}',
+            reply_markup=markups.to_menus)
+
+
 @dp.message_handler(commands='dices')
 async def dices(message: types.Message):
-    outcome = await message.answer_dice(emoji='🎳')
+    outcome = await message.answer_dice(emoji='🎰')
     sleep(5)
     await message.answer(f'Исход — {outcome["dice"]["value"]}')
 
@@ -625,6 +661,12 @@ async def soccer_rules(message: types.Message):
 async def basketball_rules(message: types.Message):
     await bot.send_message(message.from_user.id,
                            f'🏀 Баскетбол — одна из самых популярных и уважаемых игр в США. Мы не в США, поэтому играть будем по-своему: ты бросаешь мяч, а я решаю, дать тебе денег или забрать их у тебя. Здорово я придумал? Вот подробности:\n\nЧтобы сыграть в баскетбол, тебе нужно ввести команду "/basketball", дописать к ней твою ставку, а затем отправить сообщение в чат. Шанс попасть в корзину составляет 2/5, поэтому при победе твоя ставка вернётся к тебе в 2.5-кратном размере.\nВот пример того, как должна выглядеть команда:\n\n/basketball {randint(100, 10000)}\n\nПомни, что нельзя ставить больше денег, чем у тебя есть. 😉')
+
+
+@dp.callback_query_handler(text='bowling_rules')
+async def bowling_rules(message: types.Message):
+    await bot.send_message(message.from_user.id,
+                           f'🎳 Боулинг — очень весёлая игра. Знаешь, как сделать его ещё веселее? Правильно, деньгами! Выбьешь страйк — я тебе заплачу, не выбьешь — заберу твои деньги. Вот правила:\n\nЧтобы сыграть в боулинг, тебе нужно ввести команду "/bowling", дописать к ней твою ставку, а затем отправить сообщение в чат. Шанс выбить страйк составляет 1/6, поэтому при победе твоя ставка вернётся к тебе в 6-кратном размере.\nВот пример того, как должна выглядеть команда:\n\n/bowling {randint(100, 10000)}\n\nПомни, что нельзя ставить больше денег, чем у тебя есть. 😉')
 
 
 if __name__ == '__main__':
