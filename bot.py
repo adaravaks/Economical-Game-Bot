@@ -13,31 +13,40 @@ dp = Dispatcher(bot=bot)
 
 @dp.message_handler(commands='start')
 async def start(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     if not user_exists(username):
         add_user(username, money=0)
         await message.answer('Я добавил тебя в базу данных. Не возражаешь, ведь? Вот и отлично!')
     else:
         await message.answer(f'Ты уже есть в базе данных')
 
-    await message.answer(f'Добро пожаловать в игру, {username}', reply_markup=markups.main_menu)
+    await message.answer(f'Добро пожаловать в игру, {username}', reply_markup=markups.start_menu)
+
+
+@dp.message_handler(commands='help')
+async def help_msg(message: types.Message):
+    await message.answer('👋 Привет. Твоя главная цель в этой игре — заработать как можно больше денег. Есть два основных способа заработка денег:\n\n🏦 Предприятия. Постоянный источник дохода и надёжная опора для игрока в любой ситуации.\n\n🎰 Азартные игры. Рискованно, но размер выигрыша соответсвует размеру риска.\n\nКроме того, для поддержки новичков всем игрокам доступна возможность получать бесплатный бонус размером в 2000 💵 раз в два часа.\n\n Перемещение между разделами бота осуществляется с помощью кнопок под сообщениями. Кнопка под этим сообщением отправляет тебя, в соответствии с надписью, в главное меню.\n\nДля вызова этого сообщения или главного меню вы, помимо перемещения через кнопки, можете в любой момент использовать команды "/help" и "/menu" соответственно.\n\nУ бота есть и другие команды (например, для игры в рулетку), каждая из которых имеет инструкцию по применению и пример использования, ты и сам это позже увидишь.\n\nС вопросами о боте можете обращаться к создателю — @adaravaks (это я 🤫)',
+                         reply_markup=markups.to_main_menu)
 
 
 @dp.message_handler(commands='menu')
-async def start(message: types.Message):
-    username = message.from_user.username
-    await message.answer(f'😚 Привет, пупсик {username}! Вот сегодняшнее меню:',
+async def menu(message: types.Message):
+    username = message.from_user.full_name
+    await message.answer(f'😚 Привет, пупсик {username}! Вот наше сегодняшнее меню:',
                          reply_markup=markups.main_menu)
 
 
 @dp.message_handler(commands='coin_toss')
 async def coin_toss(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     msg_words = message.text.split()
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 3 and (msg_words[1] == 'орёл' or msg_words[1] == 'решка'):
-            if stake_money > get_user_money(username):
+            if stake_money <= 0:
+                await message.reply('❌ Очень умно, но я умнее, так что не дам тебе сделать такую ставку')
+                return None
+            elif stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
                 return None  # Read as "break"
@@ -66,13 +75,16 @@ async def coin_toss(message: types.Message):
 
 @dp.message_handler(commands='roulette')
 async def roulette(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     msg_words = message.text.split()
     possible_outcomes = ["красное", "чёрное", "чётное", "нечётное", "1-18", "19-36", "1-12", "13-24", "25-36"] + [str(i) for i in range(37)]
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 3 and (msg_words[1] in possible_outcomes):
-            if stake_money > get_user_money(username):
+            if stake_money <= 0:
+                await message.reply('❌ Очень умно, но я умнее, так что не дам тебе сделать такую ставку')
+                return None
+            elif stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
                 return None
@@ -105,11 +117,11 @@ async def roulette(message: types.Message):
 
             outcome = 'Win'
             if stake_outcome == outcome_color or stake_outcome == outcome_oddeven or stake_outcome == outcome_half:
-                money_multiplier = 2
+                money_multiplier = 1
             elif stake_outcome == outcome_third:
-                money_multiplier = 3
+                money_multiplier = 2
             elif stake_outcome == str(outcome_number):
-                money_multiplier = 36
+                money_multiplier = 35
             else:
                 outcome = 'Loss'
                 money_multiplier = -1
@@ -118,7 +130,7 @@ async def roulette(message: types.Message):
             change_money(username, new_money)
             if outcome == 'Win':
                 await message.reply(
-                    f'🥳 Ура, победа!\n\n Шарик рулетки упал на:\n{outcome_emoji}  {outcome_number},  {outcome_oddeven}\n\nТы выиграл, поставив на {stake_outcome}, поэтому твоя ставка возвращается к тебе в {str(money_multiplier)+"-х" if money_multiplier != 36 else str(money_multiplier)+"-и"} кратном размере.\nВ твоём кошельке внезапно оказались дополнительные {(stake_money * money_multiplier) - stake_money} 💵.\nЕсли уверен, что удача тебя не подведёт, можешь сыграть в рулетку ещё разок.',
+                    f'🥳 Ура, победа!\n\n Шарик рулетки упал на:\n{outcome_emoji}  {outcome_number},  {outcome_oddeven}\n\nТы выиграл, поставив на {stake_outcome}, поэтому твоя ставка возвращается к тебе в {str(money_multiplier + 1)+"-х" if money_multiplier != 36 else str(money_multiplier + 1)+"-и"} кратном размере.\nВ твоём кошельке внезапно оказались дополнительные {stake_money * money_multiplier} 💵.\nЕсли уверен, что удача тебя не подведёт, можешь сыграть в рулетку ещё разок.',
                     reply_markup=markups.to_menus)
             else:
                 await message.reply(
@@ -136,12 +148,15 @@ async def roulette(message: types.Message):
 
 @dp.message_handler(commands='dice')
 async def dice(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     msg_words = message.text.split()
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 3 and int(msg_words[1]) in range(1, 7):
-            if stake_money > get_user_money(username):
+            if stake_money <= 0:
+                await message.reply('❌ Очень умно, но я умнее, так что не дам тебе сделать такую ставку')
+                return None
+            elif stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
                 return None
@@ -172,12 +187,15 @@ async def dice(message: types.Message):
 
 @dp.message_handler(commands='darts')
 async def darts(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     msg_words = message.text.split()
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 2:
-            if stake_money > get_user_money(username):
+            if stake_money <= 0:
+                await message.reply('❌ Очень умно, но я умнее, так что не дам тебе сделать такую ставку')
+                return None
+            elif stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
                 return None
@@ -208,12 +226,15 @@ async def darts(message: types.Message):
 
 @dp.message_handler(commands='soccer')
 async def soccer(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     msg_words = message.text.split()
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 2:
-            if stake_money > get_user_money(username):
+            if stake_money <= 0:
+                await message.reply('❌ Очень умно, но я умнее, так что не дам тебе сделать такую ставку')
+                return None
+            elif stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
                 return None
@@ -244,12 +265,15 @@ async def soccer(message: types.Message):
 
 @dp.message_handler(commands='basketball')
 async def basketball(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     msg_words = message.text.split()
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 2:
-            if stake_money > get_user_money(username):
+            if stake_money <= 0:
+                await message.reply('❌ Очень умно, но я умнее, так что не дам тебе сделать такую ставку')
+                return None
+            elif stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
                 return None
@@ -280,12 +304,15 @@ async def basketball(message: types.Message):
 
 @dp.message_handler(commands='bowling')
 async def bowling(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     msg_words = message.text.split()
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 2:
-            if stake_money > get_user_money(username):
+            if stake_money <= 0:
+                await message.reply('❌ Очень умно, но я умнее, так что не дам тебе сделать такую ставку')
+                return None
+            elif stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
                 return None
@@ -316,12 +343,15 @@ async def bowling(message: types.Message):
 
 @dp.message_handler(commands='slotmachine')
 async def slotmachine(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     msg_words = message.text.split()
     try:
         stake_money = int(msg_words[-1])
         if len(msg_words) == 2:
-            if stake_money > get_user_money(username):
+            if stake_money <= 0:
+                await message.reply('❌ Очень умно, но я умнее, так что не дам тебе сделать такую ставку')
+                return None
+            elif stake_money > get_user_money(username):
                 await message.reply(
                     f"❌ Извини, но денег тебе на такую ставку не хватит. Влезать в долги тоже не вариант, так что поумерь свои амбиции")
                 return None
@@ -353,14 +383,14 @@ async def slotmachine(message: types.Message):
 @dp.message_handler()
 async def other(message: types.Message):
     await message.reply(
-        'Я изо всех сил пытаюсь тебя понять, но не могу.\n😓 Пожалуйста, хватит выставлять меня дураком. Просто отправь "/menu" или нажми кнопку ниже и играй в игру, которую я приготовил.',
-        reply_markup=markups.to_main_menu)
+        'Я изо всех сил пытаюсь тебя понять, но не могу.\n😓 Пожалуйста, хватит выставлять меня дураком. Если хочешь узнать больше об игре — отправь "/help" или нажни на кнопку "Помощь" ниже.',
+        reply_markup=markups.wrong_text_markup)
 
 
 @dp.callback_query_handler(text='user_checkout')
 async def user_checkout(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
-    username = message.from_user.username
+    username = message.from_user.full_name
     await bot.send_message(message.from_user.id,
                            f'👤 Имя пользователя:\n    🔹 {username}\n\n💰 Деньги:\n    🔹 {get_user_money(username)} 💵\n\n🏆 Позиция в списке богачей:\n    🔹 {user_in_leaderboard(username)}\n\n😼 Становись лучше.',
                            reply_markup=markups.to_main_menu)
@@ -369,7 +399,7 @@ async def user_checkout(message: types.Message):
 @dp.callback_query_handler(text='to_main_menu')
 async def back_to_menu(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
-    username = message.from_user.username
+    username = message.from_user.full_name
     await bot.send_message(message.from_user.id, f'😚 Привет, пупсик {username}! Вот сегодняшнее меню:',
                            reply_markup=markups.main_menu)
 
@@ -393,7 +423,7 @@ async def to_money_menu(message: types.Message):
 
 @dp.callback_query_handler(text='free_bonus')
 async def free_bonus(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     if bonus_available(username):
         change_money(username, 2000)
         await bot.send_message(message.from_user.id,
@@ -419,12 +449,12 @@ async def shop_menu(message: types.Message):
 @dp.callback_query_handler(text='check_kiosk')
 async def check_kiosk(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
-    await bot.send_message(message.from_user.id, f'🔵  🗞 Киоск с газетами — выгодное вложение, если ты ещё только в самом начале твоего пути к обогащению.\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_kiosk)
+    await bot.send_message(message.from_user.id, f'🔵  🗞 Киоск с газетами — выгодное вложение, если ты ещё только в самом начале твоего пути к обогащению. Прибыли от него немного, но и вложений он в себя много не требует. Купим?\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("киоск_с_газетами")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_kiosk)
 
 
 @dp.callback_query_handler(text='buy_kiosk')
 async def buy_kiosk(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'киоск_с_газетами'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -445,7 +475,7 @@ async def check_apiary(message: types.Message):
 
 @dp.callback_query_handler(text='buy_apiary')
 async def buy_apiary(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'пчелиная_пасека'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -466,7 +496,7 @@ async def check_carwash(message: types.Message):
 
 @dp.callback_query_handler(text='buy_carwash')
 async def buy_carwash(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'автомойка'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -487,7 +517,7 @@ async def check_cafe(message: types.Message):
 
 @dp.callback_query_handler(text='buy_cafe')
 async def buy_cafe(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'кафе'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -508,7 +538,7 @@ async def check_cottages(message: types.Message):
 
 @dp.callback_query_handler(text='buy_cottages')
 async def buy_cottages(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'коттеджный_посёлок'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -524,12 +554,12 @@ async def buy_cottages(message: types.Message):
 @dp.callback_query_handler(text='check_tvshow')
 async def check_tvshow(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
-    await bot.send_message(message.from_user.id, f'🔵  📽 ТВ-шоу со звёздами будет притягивать к себе внимание уставших работяг, пришедших вечером с работы и желающих отдохнуть перед телевизором с бутылкой какой-нибудь бурды. Чем больше мы таких соберём перед экранами — тем больше денег получим от рекламных пауз. Конечно, огромные рейтинги требуют огромной зрелищности, но эту часть я готов взять на себя. Ну что, порвём экраны? 😈\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("тв_шоу_со_звёздами")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("тв_шоу_со_звёздами")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_tvshow)
+    await bot.send_message(message.from_user.id, f'🔵  📽 ТВ-шоу со звёздами будет притягивать к себе внимание уставших работяг, желающих отдохнуть перед телевизором с бутылкой какой-нибудь бурды. Чем больше мы таких соберём перед экранами — тем больше денег получим от рекламных пауз. Конечно, огромные рейтинги требуют огромной зрелищности, но эту часть я готов взять на себя. Ну что, порвём экраны? 😈\n\n  🔹 Цена: {get_business_price_and_profit_by_funcname("тв_шоу_со_звёздами")[0]} 💵\n  🔹 Прибыль: {get_business_price_and_profit_by_funcname("тв_шоу_со_звёздами")[1]} 💵 / час\n\n Купить?', reply_markup=markups.buy_tvshow)
 
 
 @dp.callback_query_handler(text='buy_tvshow')
 async def buy_tvshow(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'тв_шоу_со_звёздами'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -550,7 +580,7 @@ async def check_bank(message: types.Message):
 
 @dp.callback_query_handler(text='buy_bank')
 async def buy_bank(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'банк'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -571,7 +601,7 @@ async def check_pmc(message: types.Message):
 
 @dp.callback_query_handler(text='buy_pmc')
 async def buy_pmc(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'частная_военная_компания'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -592,7 +622,7 @@ async def check_spacecolonies(message: types.Message):
 
 @dp.callback_query_handler(text='buy_spacecolonies')
 async def buy_spacecolonies(message: types.Message):
-    username = message.from_user.username
+    username = message.from_user.full_name
     business_func_name = 'колонизация_космоса'
     if get_user_money(username) < get_business_price(business_func_name):
         await bot.send_message(message.from_user.id,
@@ -608,7 +638,7 @@ async def buy_spacecolonies(message: types.Message):
 @dp.callback_query_handler(text='business_overview')
 async def business_overview(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
-    username = message.from_user.username
+    username = message.from_user.full_name
     overview = '🤩 Вот, взгляни, чего мы уже добились:\n\n'
     businesses = get_user_businesses(username)
 
@@ -627,7 +657,7 @@ async def business_overview(message: types.Message):
 @dp.callback_query_handler(text='check_profit')
 async def check_profit(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
-    username = message.from_user.username
+    username = message.from_user.full_name
     if not get_user_businesses(username):
         await bot.send_message(message.from_user.id,
                                '❌ Какая ещё прибыль? Ты для начала хоть одним предприятием обзаведись.',
@@ -648,7 +678,7 @@ async def check_profit(message: types.Message):
 @dp.callback_query_handler(text='receive_profit')
 async def receive_profit(message: types.Message):
     await bot.delete_message(message.from_user.id, message.message.message_id)
-    username = message.from_user.username
+    username = message.from_user.full_name
     profit = check_business_profit(username)
     if not get_user_businesses(username):
         await bot.send_message(message.from_user.id,
@@ -702,6 +732,14 @@ async def bowling_rules(message: types.Message):
 async def slotmachine_rules(message: types.Message):
     await bot.send_message(message.from_user.id,
                            f'🎰 Слот-машина — самый настоящий объект зависимости у некоторых игроков казино. Это, конечно, плохо, но, с другой стороны, как же приятно в слот-машине выигрывать! Давай, убедись сам. Вот правила:\n\nЧтобы сыграть в слот-машину, тебе нужно ввести команду "/slotmachine", дописать к ней твою ставку, а затем отправить сообщение в чат. Шанс выиграть составляет 4/64, поэтому при победе твоя ставка вернётся к тебе в 16-кратном размере.\nВот пример того, как должна выглядеть команда:\n\n/slotmachine {randint(100, 10000)}\n\nПомни, что нельзя ставить больше денег, чем у тебя есть. 😉')
+
+
+@dp.callback_query_handler(text='help_message')
+async def slotmachine_rules(message: types.Message):
+    await bot.delete_message(message.from_user.id, message.message.message_id)
+    await bot.send_message(message.from_user.id,
+                           '👋 Привет. Твоя главная цель в этой игре — заработать как можно больше денег. Есть два основных способа заработка денег:\n\n🏦 Предприятия. Постоянный источник дохода и надёжная опора для игрока в любой ситуации.\n\n🎰 Азартные игры. Рискованно, но размер выигрыша соответсвует размеру риска.\n\nКроме того, для поддержки новичков всем игрокам доступна возможность получать бесплатный бонус размером в 2000 💵 раз в два часа.\n\n Перемещение между разделами бота осуществляется с помощью кнопок под сообщениями. Кнопка под этим сообщением отправляет тебя, в соответствии с надписью, в главное меню.\n\nПочти каждая команда в боте имеет инструкцию по применению и пример использования, ты и сам это позже увидишь.\n\nС вопросами о боте можете обращаться к создателю — @adaravaks (это я 🤫)',
+                           reply_markup=markups.to_main_menu)
 
 
 if __name__ == '__main__':
